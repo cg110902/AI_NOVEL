@@ -50,10 +50,11 @@ def load_registered_characters(workspace_dir: Path):
     if index_file.exists():
         content = index_file.read_text(encoding="utf-8")
         for line in content.splitlines():
-            if line.startswith("|") and not line.startswith("| 角色姓名") and not line.startswith("|---"):
+            if line.startswith("|") and not line.startswith("| 角色姓名") and not is_table_separator(line):
                 parts = [p.strip() for p in line.split("|") if p.strip()]
                 if parts and not parts[0].startswith("["):
                     clean_name = re.sub(r"[*_`]", "", parts[0])
+                    clean_name = strip_name_title(clean_name)
                     if clean_name and len(clean_name) <= 10:
                         chars.add(clean_name)
     
@@ -142,6 +143,8 @@ from collections import defaultdict
 _tools_dir = Path(__file__).resolve().parent
 if str(_tools_dir) not in sys.path:
     sys.path.insert(0, str(_tools_dir))
+
+from novel_utils import strip_name_title, is_table_separator  # noqa: E402  (延迟导入，路径就绪后)
 
 from novel_utils import resolve_workspace, find_manuscript_files, reconfigure_utf8
 

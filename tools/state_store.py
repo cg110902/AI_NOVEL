@@ -560,14 +560,19 @@ def merge_growth_arcs(workspace: Path, arcs: list, chapter: str,
                 break
         stage = a.get("stage", "")
         if idx < 0:
-            items.append({
+            new_arc = {
                 "name": name,
                 "baseline": a.get("baseline", stage or "初始基线"),
                 "stage": stage,
                 "inciting_event": a.get("inciting_event", "待记录"),
                 "strategy": a.get("strategy", ""),
                 "ultimate": a.get("ultimate", "（长线成长）"),
-            })
+            }
+            if a.get("strategy"):
+                new_arc["strategy_history"] = [{
+                    "chapter": chapter, "strategy": a["strategy"],
+                }]
+            items.append(new_arc)
             report["updated"].append(f"🧠 新建心智台账：{name} → {stage}")
         else:
             if stage:
@@ -575,9 +580,11 @@ def merge_growth_arcs(workspace: Path, arcs: list, chapter: str,
             if a.get("inciting_event"):
                 items[idx]["inciting_event"] = a["inciting_event"]
             if a.get("strategy"):
-                prev = items[idx].get("strategy", "")
-                items[idx]["strategy"] = (prev + "；" + a["strategy"]
-                                          if prev else a["strategy"])
+                # 覆盖式：strategy 只保留「当前」策略，历史按章归档到 strategy_history，
+                # 避免每章用「；」无上限追加、字段退化成流水账（可读性优先）。
+                items[idx]["strategy"] = a["strategy"]
+                hist = items[idx].setdefault("strategy_history", [])
+                hist.append({"chapter": chapter, "strategy": a["strategy"]})
             if a.get("baseline"):
                 items[idx]["baseline"] = a["baseline"]
             if a.get("ultimate"):

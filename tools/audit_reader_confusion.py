@@ -36,6 +36,7 @@ from novel_utils import (
     natural_chapter_sort_key,
     reconfigure_utf8,
     has_placeholder,
+    strip_name_title,
 )
 
 from findings import envelope, finding, level
@@ -96,6 +97,7 @@ def _load_entity_registry(workspace_dir: Path) -> dict:
                 if parts:
                     name = re.sub(r"[*_`#]", "", parts[0]).strip()
                     name = re.sub(r"\s*[（(].*?[）)]", "", name).strip()
+                    name = strip_name_title(name)
                     if name and 2 <= len(name) <= 10 and not has_placeholder(name):
                         registry[name] = "character"
 
@@ -159,9 +161,21 @@ def _load_entity_registry(workspace_dir: Path) -> dict:
     return registry
 
 
+def _recall_keywords(gun_name: str, registered: set) -> list:
+    """从伏笔名提取「回忆触发关键词」，但排除等于已注册角色名的词。
+
+    角色名（如「陈浔」「钱老爷」）在正文中会因剧情需要频繁出现，把它们当作
+    伏笔回忆触发词，会在每次角色登场时误报「缺回忆提示」，造成 WARNING 无法清零。
+    真正有回忆价值的伏笔关键词是「开山斧」「灵脉」「异光」这类道具/概念词。
+    """
+    kws = [kw for kw in re.findall(r"[\u4e00-\u9fa5]{2,6}", gun_name) if len(kw) >= 2]
+    return [kw for kw in kws if kw not in registered]
+
+
 def _load_chekhov_guns(workspace_dir: Path) -> list:
     """Load Chekhov guns, preferring the JSON machine SSOT over rendered Markdown."""
     guns = []
+    registered = set(load_registered_characters(workspace_dir))
     state_dir = workspace_dir / "04_timeline_and_state"
     json_file = state_dir / "chekhov_guns.json"
     if json_file.exists():
@@ -178,7 +192,7 @@ def _load_chekhov_guns(workspace_dir: Path) -> list:
                 guns.append({"id": str(raw.get("id", "")), "name": name,
                              "plant_chapter": int(match.group()) if match else 1,
                              "status": str(raw.get("status", "")),
-                             "keywords": [kw for kw in re.findall(r"[\u4e00-\u9fa5]{2,6}", name) if len(kw) >= 2]})
+                             "keywords": _recall_keywords(name, registered)})
             return guns
         except Exception:
             pass
@@ -199,8 +213,8 @@ def _load_chekhov_guns(workspace_dir: Path) -> list:
             plant_ch_match = re.search(r"(\d+)", parts[2])
             plant_ch = int(plant_ch_match.group(1)) if plant_ch_match else 1
             status = parts[3] if len(parts) > 3 else ""
-            # Extract meaningful keywords from the gun name
-            keywords = [kw for kw in re.findall(r"[\u4e00-\u9fa5]{2,6}", gun_name) if len(kw) >= 2]
+            # Extract meaningful keywords from the gun name (角色名除外，防误报)
+            keywords = _recall_keywords(gun_name, registered)
             guns.append({
                 "id": gun_id,
                 "name": gun_name,

@@ -188,8 +188,8 @@ class TestPackBudget(unittest.TestCase):
         self.assertEqual(br["within_budget"], br["total_kept_tokens"] <= 900)
         # 可裁区块（世界观/卷纲/人物卡）在预算紧张时确实被裁
         self.assertTrue(any(s["dropped_tokens"] > 0 for s in br["sections"]))
-        # 记忆区块在全量装配后存在
-        self.assertIn("废土求生", pkg.get("synopsis_spine", ""))
+        # 记忆区块在全量装配后存在；预算模式下防重复刚需：最近一章梗概必须保留
+        self.assertIn("废仓库之夜", pkg.get("synopsis_spine", ""))
 
     def test_full_mode_has_memory_sections(self):
         from package_context import package_context_for_chapter

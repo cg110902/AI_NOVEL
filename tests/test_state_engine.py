@@ -110,6 +110,26 @@ class TestStateApply(unittest.TestCase):
         ga = (self.ws / "04_timeline_and_state/character_growth_arcs.md").read_text(encoding="utf-8")
         self.assertIn("Stage 2【信息做庄】", ga)
 
+    def test_growth_strategy_overwrites_with_history(self):
+        """回归：growth_arcs.strategy 采用覆盖式（保留最新），历史按章归档到
+        strategy_history，避免多章用「；」无上限追加成流水账。"""
+        p1 = {"schema": MUTATION_SCHEMA, "chapter": "ch_001",
+              "growth_arcs": [{"name": "陈昂", "stage": "S", "strategy": "策略甲"}]}
+        self.assertEqual(apply_proposal(self.ws, p1)["errors"], [])
+        p2 = {"schema": MUTATION_SCHEMA, "chapter": "ch_002",
+              "growth_arcs": [{"name": "陈昂", "strategy": "策略乙"}]}
+        self.assertEqual(apply_proposal(self.ws, p2)["errors"], [])
+        ga = json.loads((self.ws / "04_timeline_and_state/character_growth_arcs.json")
+                        .read_text(encoding="utf-8"))
+        arc = next(a for a in ga["arcs"] if a["name"] == "陈昂")
+        # strategy 只保留最新，不被「；」无限追加
+        self.assertEqual(arc["strategy"], "策略乙")
+        self.assertNotIn("策略甲", arc["strategy"])
+        # 历史完整归档，按章节可回溯
+        hist = arc.get("strategy_history", [])
+        self.assertEqual([h["strategy"] for h in hist], ["策略甲", "策略乙"])
+        self.assertEqual([h["chapter"] for h in hist], ["ch_001", "ch_002"])
+
 
 class TestValidateState(unittest.TestCase):
     def setUp(self):

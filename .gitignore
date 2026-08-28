@@ -4,3 +4,6 @@ novel_workspace/
 # Python 缓存
 __pycache__/
 *.py[cod]
+
+# 可再生的导出产物（源在 novel_workspace/，二者同源不入库）
+开局长生万古_第1章.txt

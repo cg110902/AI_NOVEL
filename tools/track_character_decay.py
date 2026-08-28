@@ -22,7 +22,10 @@ _tools_dir = Path(__file__).resolve().parent
 if str(_tools_dir) not in sys.path:
     sys.path.insert(0, str(_tools_dir))
 
-from novel_utils import resolve_workspace, find_manuscript_files, reconfigure_utf8
+from novel_utils import (
+    resolve_workspace, find_manuscript_files, reconfigure_utf8, strip_name_title,
+    is_table_separator,
+)
 
 reconfigure_utf8()
 
@@ -32,11 +35,16 @@ def load_characters(workspace_dir: Path):
     if index_file.exists():
         content = index_file.read_text(encoding="utf-8")
         for line in content.splitlines():
-            if line.startswith("|") and not line.startswith("| 角色") and not line.startswith("|---") and not line.startswith("|:---"):
+            # 跳过表头/表体分隔行（兼容 `| --- |`、`|:---|`、`| :--- |` 等变体）
+            if line.startswith("|") and not line.startswith("| 角色") and not is_table_separator(line):
                 parts = [p.strip() for p in line.split("|") if p.strip()]
                 if len(parts) >= 3:
+                    # 首列仅由分隔符符号组成（如 :---）不是角色名，过滤
+                    if re.fullmatch(r"[\s:\-]+", parts[0]):
+                        continue
                     cname = re.sub(r"[*_`]", "", parts[0]).strip()
                     cname = re.sub(r"\s*[（(].*?[）)]", "", cname).strip()
+                    cname = strip_name_title(cname)
                     role_type = parts[1].strip()
                     # Assign Memory Strength (S) based on role
                     if "主角" in role_type or "男主" in role_type:

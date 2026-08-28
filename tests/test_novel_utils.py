@@ -173,5 +173,83 @@ class TestNovelUtils(unittest.TestCase):
         self.assertEqual(parse_num("一百五十"), 150)
 
 
+class TestStripNameTitle(unittest.TestCase):
+    """回归：头衔前缀不应并入角色名，否则正文短名匹配会失配（误判从未登场）。"""
+
+    def test_strips_leading_title_prefix(self):
+        from novel_utils import strip_name_title
+        self.assertEqual(strip_name_title("村长·张老爹"), "张老爹")
+        self.assertEqual(strip_name_title("游方道人·玄清"), "玄清")
+        self.assertEqual(strip_name_title("陈浔"), "陈浔")  # 无前缀原样返回
+        self.assertEqual(strip_name_title(""), "")
+
+    def test_register_strips_title_prefix(self):
+        import tempfile, shutil, json
+        from init_new_novel import init_novel
+        from novel_utils import load_registered_characters
+        tmp = Path(tempfile.mkdtemp(prefix="novel_nametitle_"))
+        try:
+            ws = tmp / "ws"
+            init_novel(workspace_path=str(ws))
+            idx = ws / "02_characters" / "character_index.md"
+            # 用带前缀的头衔名覆盖示例行
+            rows = ["| **村长·张老爹** | 陈家村 / 长者 | 守村 | X | 第 1 章 |",
+                    "| **游方道人·玄清** | 官方 / 散修 | 查异象 | X | 第 1 章 |"]
+            body = "| 角色姓名 | 阵营 | 动机 | 反差 | 登场 |\n| :--- | :--- | :--- | :--- | :--- |\n" + "\n".join(rows) + "\n"
+            idx.write_text(body, encoding="utf-8")
+            chars = load_registered_characters(ws)
+            self.assertIn("张老爹", chars)
+            self.assertIn("玄清", chars)
+            # 分隔行 `:---` 不得被当成角色
+            self.assertNotIn(":---", chars)
+            self.assertNotIn("---", chars)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestRecallKeywordFilter(unittest.TestCase):
+    """回归：伏笔回忆关键词应排除已注册角色名，防止角色登场即误报缺回忆提示。"""
+
+    def test_recall_keywords_exclude_registered_names(self):
+        from audit_reader_confusion import _recall_keywords
+        registered = {"陈浔", "钱老爷", "张老爹"}
+        kws = _recall_keywords("钱老爷/周赖三的目光（盘剥势力留意陈浔）", registered)
+        self.assertNotIn("钱老爷", kws)
+        self.assertNotIn("陈浔", kws)
+        # 道具/概念词应保留（回忆价值）
+        self.assertTrue(any("目光" in k for k in kws))
+        # 无角色名的纯概念伏笔不受角色名过滤影响（仍保留非角色关键词）
+        kws2 = _recall_keywords("腰间三把开山斧（从未出鞘）", registered)
+        self.assertTrue(kws2, "纯概念伏笔不应被过滤为空")
+        self.assertTrue(all(k not in registered for k in kws2))
+
+
+class TestEntityRegistry(unittest.TestCase):
+    """回归：confusion 实体注册表应剥离头衔前缀、剔除分隔行幽灵条目。"""
+
+    def test_entity_registry_strips_prefix_and_no_ghost(self):
+        import tempfile, shutil
+        from init_new_novel import init_novel
+        from audit_reader_confusion import _load_entity_registry
+        tmp = Path(tempfile.mkdtemp(prefix="novel_entreg_"))
+        try:
+            ws = tmp / "ws"
+            init_novel(workspace_path=str(ws))
+            idx = ws / "02_characters" / "character_index.md"
+            body = ("| 角色姓名 | 阵营 | 动机 | 反差 | 登场 |\n"
+                    "| :--- | :--- | :--- | :--- | :--- |\n"
+                    "| **村长·张老爹** | 村 | 守村 | X | 1 |\n"
+                    "| **游方道人·玄清** | 官 | 查异象 | X | 1 |\n")
+            idx.write_text(body, encoding="utf-8")
+            reg = _load_entity_registry(ws)
+            chars = [k for k, v in reg.items() if v == "character"]
+            self.assertIn("张老爹", chars)
+            self.assertIn("玄清", chars)
+            self.assertNotIn(":---", chars)
+            self.assertNotIn("---", chars)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 if __name__ == "__main__":
     unittest.main()

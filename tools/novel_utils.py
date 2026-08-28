@@ -278,6 +278,20 @@ def find_manuscript_files(manuscript_dir: Path, target_chapter: str = None, sing
     return []
 
 
+def strip_name_title(name: str) -> str:
+    """去掉角色名最前面的「头衔·」前缀，用于正文匹配与展示。
+
+    角色表首列常写作「村长·张老爹」「游方道人·玄清」，但正文只以短名
+    「张老爹」「玄清」称呼。若原样注册，全文匹配会因前缀不同而失配，
+    导致角色被误判为从未登场。此函数去掉第一个「·」之前的部分；
+    无「·」的名字原样返回。
+    """
+    if not name:
+        return name
+    stripped = re.sub(r"^[^·\s]+·", "", name).strip()
+    return stripped or name
+
+
 def load_registered_characters(workspace_dir: Path) -> list:
     """Extracts all registered character names (Chinese names)."""
     chars = set()
@@ -290,6 +304,7 @@ def load_registered_characters(workspace_dir: Path) -> list:
                 if parts and not parts[0].startswith("[") and not parts[0].startswith(":") and not parts[0].startswith("-") and "角色" not in parts[0] and "姓名" not in parts[0]:
                     clean_name = re.sub(r"[*_`#]", "", parts[0]).strip()
                     clean_name = re.sub(r"\s*[（(].*?[）)]", "", clean_name).strip()
+                    clean_name = strip_name_title(clean_name)
                     if clean_name and len(clean_name) <= 10 and not has_placeholder(clean_name):
                         chars.add(clean_name)
 

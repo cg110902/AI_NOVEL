@@ -59,7 +59,8 @@ def _apply_budget(package: dict, budget: int) -> dict:
       7 relevant_character_profiles（最长，最先被裁）
 
     预算耗尽（剩余 room≤0）时的兜底：细纲/预警仍绝不裁；current_state（状态真值）
-    整块保留；梗概脊柱仅留"全书一句话"；上一章余温保留末段最小锚点；其余低优先级
+    整块保留；梗概脊柱为防重复刚需，无论预算多紧都至少保留"全书一句话 + 最近一章"，
+    预算越紧丢的越是更早章节、绝不返回空串；上一章余温保留末段最小锚点；其余低优先级
     区块清空。被裁内容只是不进本次打包、原文件完好，budget_report 逐项记录并给出
     找回提示（hint），可按需直读原文件或调高预算重跑。
     """
@@ -157,36 +158,29 @@ def _apply_budget(package: dict, budget: int) -> dict:
         used += sbt
         _log("story_bible", sbt, 0, "项目圣经，整块保留（防吃设定）")
 
-    # --- 梗概脊柱：整段，超预算则只留最近 N 章 ---
+    # --- 梗概脊柱：防重复刚需，始终至少保留最近一章，预算紧才丢旧章，绝不出空 ---
     spine = package.get("synopsis_spine", "")
     spt = _est_tokens(spine)
     room = _room()
-    if spt > room > 0 and spine:
+    if not spine:
+        _log("synopsis_spine", 0, 0)
+    else:
         lines = spine.splitlines()
-        # 保留"全书一句话"（若有）+ 最近的章节行
-        head = [lines[0]] if lines and lines[0].startswith("全书") else []
+        head = [lines[0]] if lines[0].startswith("全书") else []
         body = [l for l in lines if l not in head]
         keep_body, klen = [], _est_tokens("\n".join(head))
-        for ln in reversed(body):
+        for i, ln in enumerate(reversed(body)):
             lt = _est_tokens(ln)
-            if klen + lt > room:
+            # 最近一章（i==0）无条件保留，守住防重复下限；其余仅当预算允许
+            if i != 0 and klen + lt > room:
                 break
             keep_body.append(ln)
             klen += lt
         package["synopsis_spine"] = "\n".join(head + list(reversed(keep_body)))
-        _log("synopsis_spine", klen, spt - klen, "超预算，只留最近章节梗概")
+        dropped = spt - klen
+        _log("synopsis_spine", klen, dropped,
+             "预算紧张：保留最近章节梗概（防重复），丢弃更早章节" if dropped else "")
         used += klen
-    elif room <= 0 and spine:
-        # 预算耗尽：仅保留"全书一句话"锚点，其余章节梗概裁剪（原文件仍在）
-        lines = spine.splitlines()
-        head = [lines[0]] if lines and lines[0].startswith("全书") else []
-        package["synopsis_spine"] = "\n".join(head)
-        klen = _est_tokens("\n".join(head))
-        _log("synopsis_spine", klen, spt - klen, "预算耗尽，仅保留全书一句话锚点")
-        used += klen
-    else:
-        used += spt
-        _log("synopsis_spine", spt, 0)
 
     # --- previous_chapter_ending：可裁剪长度 ---
     pe = package.get("previous_chapter_ending", "")
