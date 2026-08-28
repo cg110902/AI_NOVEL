@@ -1,0 +1,6 @@
+# Universal Novel Studio — 生产工作区与本地缓存不入库
+novel_workspace/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
