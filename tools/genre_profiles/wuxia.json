@@ -1,0 +1,36 @@
+{
+  "schema": "novel-studio.genre-profile/v2",
+  "id": "wuxia",
+  "label": "武侠 / 江湖 / 武林",
+  "creation_goal": "commercial",
+  "word_count": {"min": 2500, "recommended": 3200, "max": 4000},
+  "ratio_baseline": {"dialogue": [30, 50], "action": [30, 50], "describe": [12, 30]},
+  "tone_policy": {
+    "mode": "mixed",
+    "bright_allowed": true,
+    "dark_allowed": true,
+    "note": "武侠有江湖快意也有恩怨情仇，基调随场景灵活切换，无通用禁令。"
+  },
+  "state_components": ["current_state", "chekhov_guns", "timeline", "character_growth_arcs", "misunderstandings"],
+  "stall_window": 3,
+  "scheduler": {"remind_lead": 3, "dormant_gap": 5, "longline_interval": [8, 12]},
+  "dialogue_floor": 20,
+  "describe_ceiling": 35,
+  "combat_heavy": true,
+  "economy_required": false,
+  "ending_style": "strong_hook",
+  "pov_default": "third_limited",
+  "extra_ticks": ["恐怖如斯", "倒吸一口凉气", "瞳孔骤缩", "冷哼一声", "桀桀", "江湖", "武林"],
+  "cliche_patterns": [
+    {"name": "武侠舞台剧念白", "pattern": "在下江湖中人|江湖规矩不可破|阁下好大的威风|青山不改绿水长流|就此别过", "suggestion": "舞台剧式念白建议替换为符合身份的口语机锋；时代质感词汇在贴合语境时可自然使用。"},
+    {"name": "武侠套路化外貌与气势描写", "pattern": "剑眉星目|白衣胜雪|杀气如实质|内力如江河决堤|身法快如鬼魅", "suggestion": "外貌与气势描写建议落到辨识度细节（疤、旧伤、习惯动作）与真实物理反馈上。"},
+    {"name": "武侠恩怨套话", "pattern": "血海深仇不共戴天|杀父之仇不共戴天|此仇不报非君子|有仇必报", "suggestion": "恩怨套话建议具象为具体事件、物证与人物记忆闪回，避免标签化仇恨。"},
+    {"name": "武侠旁观惊叹", "pattern": "好俊的功夫|好快的剑|此子前途不可限量|英雄出少年", "suggestion": "旁观惊叹易沦为报幕，建议通过行家的具体判断细节（看招、变脸色、收起轻视）来体现。"}
+  ],
+  "cliffhanger_keywords": ["刀光", "剑影", "暗器", "镖局", "丐帮", "少林", "武当", "内功", "轻功", "真气", "点穴", "门派", "秘籍", "江湖令"],
+  "quantity_whitelist": ["三丈", "五丈", "十丈", "百丈", "一息", "数息", "十息", "半柱香", "一柱香", "半个时辰", "一个时辰", "三招", "五招", "十招"],
+  "semantic_clusters": [
+    {"cluster_name": "武功高强同义堆砌", "keywords": ["深不可测", "深不可测", "出神入化", "登峰造极", "炉火纯青", "叹为观止"], "min_hits": 3, "suggestion": "描写武功高强时密集出现同义成语，建议用具体的招式效果、对手反应或环境变化呈现。"}
+  ],
+  "director_notes": "武侠核心是江湖快意与恩怨情仇，战斗描写重意境与招式美感而非数值面板；人物对白可带江湖气但必须讲人话、有动机，严禁舞台剧念白；门派/镖局/帮会等组织有独立利益逻辑；轻功/内功/点穴等设定前后一致。基调随场景灵活切换——酒楼快意可明快，密室复仇可阴暗。（以上为本题材的默认偏好，不是铁律；可按本书 `project_bible` / `director_notes` 与具体场景覆盖，见 AGENTS.md「规则分级约定」。）"
+}

@@ -1,0 +1,52 @@
+# Universal Novel Studio - 全局声明式配置文件
+# 全题材自适应版本：字数/配比/基调/词表由 genre_profile.json（题材档案）控制，本文件仅为全局工程配置。
+# 状态文件以 JSON 为机器 SSOT，Markdown 为自动渲染的只读视图。
+
+project:
+  name: "预演样书" # 当前项目书名 (开新书时由 studio.py init 自定义)
+  workspace_dir: "novel_workspace" # 唯一事实真值源目录 (SSOT)
+  default_genre: "悬疑" # 默认题材 (init 时可指定，支持17种内置题材，运行 studio.py genre --list 查看)
+
+workflow:
+  mode: "automatic" # automatic：Stage 1-4 由 Agent 连续推进，用户只审查终稿；manual：关键节点逐步确认。切换：python studio.py mode --set manual|automatic
+  self_healing_pipeline: true # 对已定义的 Stage 3 lint/Stage 4 sync 失败执行有限回炉
+  max_auto_retry_attempts: 3 # 每章最多自动重试 3 次，耗尽或无法自动判断时暂停转人工
+  human_in_the_loop_mode: "final_review_only" # 正常流程仅终稿终审；初始化对齐与异常暂停是必要例外
+  autonomous_decision_policy: "director_agent_selects_and_records" # 自动模式由总策划 Agent 选择 ABC 并记录理由
+  auto_recycle_subagents: true # Sub-Agent 瞬态即焚与 100% 自动生命周期回收
+  # 以下长线保障为“声明式意图 + 默认值”，由 Agent 遵循 agents/rules/ 文档执行；
+  # 均为“默认/参考”级约束（非 🔒 不变量，见 AGENTS.md 规则分级约定）。
+  # 例外必须登记在 project_bible.md 或 director_notes，写明铺垫、代价与批准依据。
+  long_arc_safeguards:
+    max_major_power_level_jump_per_chapter: 0 # 默认单章不跨大层；含铺垫与代价的例外须登记
+    max_minor_power_steps_per_chapter: 1 # 默认单章至多推进一个小阶梯；按题材与场景心流调整
+    require_simulation_friction: true # 默认：机制突破/模拟推演应带真实波折、瓶颈或未竟之憾
+    anti_plot_homogenization: true # 默认：避免模式化套路复读与脸谱化反派；允许“教科书式套路”作为书中自觉运用的风格
+    three_tier_anticipation_model: true # 参考模型：显性目标+隐性危机+倒计时炸弹，按章节心流组合，治愈/日常可弱化
+
+generation:
+  # 字数解析优先级：书级 project_bible/director_notes > genre_profile.word_count > 本段全局 fallback。
+  # resolved min/max 才是硬门禁；recommended 仅为软目标，不得替代题材档案门限。
+  target_word_count:
+    min: 2500 # genre_profile 缺失 word_count 时的全局 fallback 下限
+    max: 4000 # genre_profile 缺失 word_count 时的全局 fallback 上限
+    recommended: 3200 # 全局 fallback 推荐值，题材档案可覆盖
+
+linter_thresholds:
+  allow_natural_dialogue_variance: true # 对白比例依场景自然自适应 (闭关章可无对白，辩论章可多对白)
+  max_consecutive_breathless_chars: 75 # 仅对超长无标点极端病句做基础兜底
+  hard_gate_min_word_count: 2500 # 仅作兼容 fallback；实际硬区间取 resolved genre_profile.word_count.min/max
+  # 注：战斗脸谱化词汇检测由 genre_profile.combat_heavy 控制，非战斗题材自动跳过
+
+subagent:
+  editor_role: "novel_editor (金牌长篇网文责编与定稿总笔)"
+  auto_kill_after_delivery: true # 交付定稿后单轮内物理销毁 Sub-Agent
+  tool_scope:
+    allowed_tools:
+      - "view_file"
+      - "write_to_file"
+      - "run_command (仅限 python studio.py lint)"
+    forbidden_tools:
+      - "Inline script execution"
+      - "Source code browsing"
+      - "State sync & snapshot tools"

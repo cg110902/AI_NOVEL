@@ -1,0 +1,36 @@
+{
+  "schema": "novel-studio.genre-profile/v2",
+  "id": "scifi",
+  "label": "科幻 / 机甲 / 星际 / 赛博朋克 / 末世废土",
+  "creation_goal": "commercial",
+  "word_count": {"min": 2500, "recommended": 3200, "max": 4000},
+  "ratio_baseline": {"dialogue": [25, 50], "action": [30, 55], "describe": [12, 35]},
+  "tone_policy": {
+    "mode": "mixed",
+    "bright_allowed": true,
+    "dark_allowed": true,
+    "note": "科幻基调跨度极大：星际探险可宏大开阔，赛博朋克可霓虹迷离，末世废土可压抑绝望，由子类型与场景决定。"
+  },
+  "state_components": ["current_state", "chekhov_guns", "timeline", "character_growth_arcs", "economy_ledger"],
+  "stall_window": 3,
+  "scheduler": {"remind_lead": 3, "dormant_gap": 5, "longline_interval": [8, 12]},
+  "dialogue_floor": 15,
+  "describe_ceiling": 40,
+  "combat_heavy": true,
+  "economy_required": true,
+  "ending_style": "strong_hook",
+  "pov_default": "third_limited",
+  "extra_ticks": ["瞳孔骤缩", "眸", "嘴角勾起", "金属质感的声音", "数据洪流", "不禁", "倒吸一口凉气", "全息", "神经接驳", "义体"],
+  "cliche_patterns": [
+    {"name": "科幻概念大词堆砌", "pattern": "降维打击|黑暗森林法则|文明的火种|人类的赞歌|历史的尘埃", "suggestion": "借用名作的宏大概念需有本书自洽的世界观支撑，避免空洞大词与蹭概念。"},
+    {"name": "科幻万能科学挡箭牌", "pattern": "这不科学|量子波动|用量子纠缠解释|超越了现有科学体系|违反了物理定律", "suggestion": "用口头禅代替推演显得廉价，建议给出具体的科技机理、观测证据或实验过程。"},
+    {"name": "机甲科幻套路", "pattern": "机甲轰然启动|能量护盾闪烁|曲率引擎轰鸣|粒子炮蓄能|驾驶舱内警报大作", "suggestion": "装备启动式套路描写建议落到操作细节、参数代价与人的判断上，避免播报式堆砌。"},
+    {"name": "末世废土套话", "pattern": "人类最后的堡垒|幸存者聚集地|资源枯竭的废土|丧尸围城", "suggestion": "末世套话需以具体的物资账、人情价与生存规则落地，避免背景板式设定复读。"}
+  ],
+  "cliffhanger_keywords": ["警报", "系统提示", "能量读数", "护盾", "跃迁", "星舰", "机甲", "义体", "赛博", "纳米", "病毒", "AI", "人工智能", "黑洞", "虫洞", "辐射", "变异", "废土", "幸存者"],
+  "quantity_whitelist": ["米", "公里", "光年", "秒", "分钟", "小时", "天", "年", "字节", "MB", "GB", "TB", "信用点", "能源块", "弹药", "发", "枚", "台", "艘", "焦耳", "瓦特", "伏特", "安培"],
+  "semantic_clusters": [
+    {"cluster_name": "科技震撼同义堆砌", "keywords": ["震撼", "不可思议", "叹为观止", "前所未见", "颠覆认知", "匪夷所思"], "min_hits": 3, "suggestion": "科技展示场景密集出现震撼同义表达，建议用具体的技术参数、物理效果或角色反应呈现科技感。"}
+  ],
+  "director_notes": "硬设定必须自洽：科技/异能/灾变规则前后一致，资源（弹药、能源、义体损耗、配给）有真实成本，拒绝凭空产出；用具体物理细节代替空泛形容词，信息给出要有层次（读者与主角同步解谜）；末世/赛博可基调冷峻但人物仍要有烟火气与动机，避免通篇压抑；星际探险可宏大开阔。科幻子类型差异大，应根据具体子类型灵活调整基调与配比。（以上为本题材的默认偏好，不是铁律；可按本书 `project_bible` / `director_notes` 与具体场景覆盖，见 AGENTS.md「规则分级约定」。）"
+}

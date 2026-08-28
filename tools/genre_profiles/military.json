@@ -1,0 +1,35 @@
+{
+  "schema": "novel-studio.genre-profile/v2",
+  "id": "military",
+  "label": "军事 / 战争 / 军旅 / 特种兵 / 谍战",
+  "creation_goal": "commercial",
+  "word_count": {"min": 2500, "recommended": 3200, "max": 4000},
+  "ratio_baseline": {"dialogue": [20, 45], "action": [35, 60], "describe": [12, 32]},
+  "tone_policy": {
+    "mode": "mixed",
+    "bright_allowed": true,
+    "dark_allowed": true,
+    "note": "军事战争基调沉重冷峻，日常/战友互动可明快温暖，战场/谍战紧张压抑，由场景决定。"
+  },
+  "state_components": ["current_state", "chekhov_guns", "timeline", "character_growth_arcs", "economy_ledger"],
+  "stall_window": 3,
+  "scheduler": {"remind_lead": 3, "dormant_gap": 5, "longline_interval": [8, 12]},
+  "dialogue_floor": 15,
+  "describe_ceiling": 38,
+  "combat_heavy": true,
+  "economy_required": true,
+  "ending_style": "strong_hook",
+  "pov_default": "third_limited",
+  "extra_ticks": ["瞳孔骤缩", "倒吸一口凉气", "沉声", "冷声道", "厉声道"],
+  "cliche_patterns": [
+    {"name": "军事口号式套话", "pattern": "铁血军人|热血洒疆场|狭路相逢勇者胜|犯我者虽远必诛|军魂不灭", "suggestion": "口号堆砌会削弱真实感，建议落到具体军衔、装备、战术与战友情上。"},
+    {"name": "战场场面陈词", "pattern": "硝烟弥漫|炮火轰鸣|钢铁洪流|战火纷飞|枪林弹雨", "suggestion": "战场建议写具体单位、地形与通信细节，少用全景式成语堆叠。"},
+    {"name": "军旅成长套话", "pattern": "从新兵蛋子到兵王|百战老兵|兵王归来|脱胎换骨的蜕变", "suggestion": "军人成长建议按军衔、技能与责任的台阶推进，避免'兵王'式标签跳级。"}
+  ],
+  "cliffhanger_keywords": ["命令", "任务", "行动", "作战", "战斗", "交火", "伏击", "包围", "突围", "撤退", "增援", "炮火", "弹药", "伤亡", "情报", "密电", "密码", "卧底", "叛变", "牺牲"],
+  "quantity_whitelist": ["米", "公里", "英尺", "码", "节", "马赫", "秒", "分钟", "小时", "发", "枚", "颗", "吨", "公斤", "班", "排", "连", "营", "团", "师", "军"],
+  "semantic_clusters": [
+    {"cluster_name": "战场惨烈同义堆砌", "keywords": ["惨烈", "血腥", "残酷", "尸横遍野", "血流成河", "满目疮痍"], "min_hits": 3, "suggestion": "战场场景密集出现惨烈形容词，建议用具体的伤亡数字或环境细节呈现战争残酷性。"}
+  ],
+  "director_notes": "军事战争核心是使命与牺牲，战术/装备/编制要有专业细节支撑，不能只说'打仗'；军人有真实的身体极限与心理压力，战斗/训练/休整有真实周期；命令链与军纪严格，角色行为符合军阶与身份；谍战重信息差与心理博弈，卧底有真实的身份危机与道德困境。军事数据需考据准确（或在设定中自洽）。基调沉重冷峻，战友互动可明快温暖作反差。（以上为本题材的默认偏好，不是铁律；可按本书 `project_bible` / `director_notes` 与具体场景覆盖，见 AGENTS.md「规则分级约定」。）"
+}

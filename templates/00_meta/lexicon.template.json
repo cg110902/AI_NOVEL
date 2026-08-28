@@ -1,0 +1,25 @@
+{
+  "schema": "novel-studio.lexicon/v1",
+  "_readme": [
+    "词表成长文件——词表不是规则，是记忆。种子只是召回锚点，完整判据见 agents/rules/novel_lexicon.md。",
+    "成长回路：lint 报「🌱 词表成长候选」或同步官发现高频新词 → 按类别卡判据裁决 → 确认的写进对应类别 grown（推荐带 by/ch/note）→ 运行 `python studio.py lexicon check` 校验。",
+    "豁免：exemptions 里的词不参与该类别检测（如本书角色固定口癖、题材惯用语）。",
+    "以 _ 开头的键是说明性内容，工具一律忽略；删除本文件即回退内置种子，零风险。"
+  ],
+  "categories": {
+    "_示例_确认后可删除": {
+      "grown": [
+        {"term": "蓦地", "by": "ai", "ch": 12, "note": "骤变状语（sudden_shift），战斗章高频"}
+      ],
+      "exemptions": [
+        {"term": "陡然", "by": "author", "note": "作者惯用，有意保留，不计密度"}
+      ]
+    }
+  },
+  "semantic_clusters": {
+    "_示例_确认后可删除": {
+      "grown": ["魂不附体"],
+      "exemptions": []
+    }
+  }
+}
